@@ -110,7 +110,6 @@ __global__ void cuda_beq(size_t n, const double* A, double* B, double* C) {
     }
 }
 
-//
 __global__ void cuda_gt(size_t n, const double* A, double B, double* C) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n) {
@@ -285,6 +284,103 @@ void Cuda_Div(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, 
 void Cuda_Neg(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
     size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
     cuda_neg<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+//
+void Cuda_Erff(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_erff<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_Ceil(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_ceil<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_Floor(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_floor<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_Round(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_round<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_Log(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_log<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_Pow(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_pow<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_GE(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_pow<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_BGE(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* B_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_bge<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_EQ(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_eq<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_BEQ(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* B_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_beq<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_GT(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_gt<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_BGT(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* B_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_bgt<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_LE(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_le<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_BLE(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* B_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_ble<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d_arr, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_LT(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_lt<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_BLT(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* B_d_arr, double* C_d_arr) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_blt<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d_arr, C_d_arr);
     cuda_get_latest_err();
 }
 
