@@ -1,4 +1,4 @@
-#include "Vector.cuh"
+#include "Vector.hpp"
 #include <stdio.h>
 #include <iostream>
 #include <cstdint>
