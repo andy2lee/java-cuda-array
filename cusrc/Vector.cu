@@ -40,6 +40,119 @@ __global__ void cuda_neg(size_t n, const double* A, double* C) {
     }
 }
 
+__global__ void cuda_erff(size_t n, const double* A, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = erff(A[i]);
+    }
+}
+
+__global__ void cuda_ceil(size_t n, const double* A, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = std::ceil(A[i]);
+    }
+}
+
+__global__ void cuda_floor(size_t n, const double* A, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = std::floor(A[i]);
+    }
+}
+
+__global__ void cuda_round(size_t n, const double* A, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = roundf(A[i]);
+    }
+}
+
+__global__ void cuda_log(size_t n, const double* A, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = std::log(A[i]);
+    }
+}
+
+__global__ void cuda_pow(size_t n, const double* A, double B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = std::pow(A[i], B);
+    }
+}
+
+__global__ void cuda_ge(size_t n, const double* A, double B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] >= B)? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_bge(size_t n, const double* A, double* B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] >= B[i])? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_eq(size_t n, const double* A, double B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] == B)? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_beq(size_t n, const double* A, double* B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] == B[i])? 1.0: 0.0;
+    }
+}
+
+//
+__global__ void cuda_gt(size_t n, const double* A, double B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] > B)? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_bgt(size_t n, const double* A, double* B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] > B[i])? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_le(size_t n, const double* A, double B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] <= B)? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_ble(size_t n, const double* A, double* B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] <= B[i])? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_lt(size_t n, const double* A, double B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] < B)? 1.0: 0.0;
+    }
+}
+
+__global__ void cuda_blt(size_t n, const double* A, double* B, double* C) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        C[i] = (A[i] < B[i])? 1.0: 0.0;
+    }
+}
+
 __global__ void cuda_add_scalar(size_t n, const double* A, const double B, double* C) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n) {
@@ -95,6 +208,8 @@ __global__ void cuda___log2f(size_t n, const double* A, double* C) {
         C[i] = __log2f(A[i]);
     }
 }
+
+
 
 void cuda_get_latest_err(void) {
     cudaError_t err = cudaGetLastError();
