@@ -287,7 +287,6 @@ void Cuda_Neg(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, 
     cuda_get_latest_err();
 }
 
-//
 void Cuda_Erff(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* C_d_arr) {
     size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
     cuda_erff<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
