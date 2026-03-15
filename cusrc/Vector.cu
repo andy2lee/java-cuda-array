@@ -1,4 +1,4 @@
-#include "Vector.h"
+#include "Vector.cuh"
 #include <stdio.h>
 #include <iostream>
 #include <cstdint>
@@ -207,8 +207,6 @@ __global__ void cuda___log2f(size_t n, const double* A, double* C) {
         C[i] = __log2f(A[i]);
     }
 }
-
-
 
 void cuda_get_latest_err(void) {
     cudaError_t err = cudaGetLastError();
