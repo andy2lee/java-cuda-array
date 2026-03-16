@@ -86,17 +86,17 @@ result_arr_ptr = FFI::MemoryPointer.new :double, ((data_row-mask_row+1)*(data_co
 data_arr_ptr.write_array_of_double data_arr
 mask_arr_ptr.write_array_of_double mask_arr
 
-cu_d_a_arr   = Vector.CudaMalloc data_arr.size*8
-cu_m_b_arr   = Vector.CudaMalloc mask_arr.size*8
-cu_res_c_arr = Vector.CudaMalloc ((data_row-mask_row+1)*(data_col-mask_col+1)*8)
+cu_d_a_arr   = Vector.CudaMalloc data_arr.size*FFI.type_size(:double)
+cu_m_b_arr   = Vector.CudaMalloc mask_arr.size*FFI.type_size(:double)
+cu_res_c_arr = Vector.CudaMalloc ((data_row-mask_row+1)*(data_col-mask_col+1)*FFI.type_size(:double))
 
-Vector.CudaMemcpy cu_d_a_arr, data_arr_ptr, data_arr.size*8, cudaMemcpyKind[:cudaMemcpyHostToDevice]
-Vector.CudaMemcpy cu_m_b_arr, mask_arr_ptr, mask_arr.size*8, cudaMemcpyKind[:cudaMemcpyHostToDevice]
+Vector.CudaMemcpy cu_d_a_arr, data_arr_ptr, data_arr.size*FFI.type_size(:double), cudaMemcpyKind[:cudaMemcpyHostToDevice]
+Vector.CudaMemcpy cu_m_b_arr, mask_arr_ptr, mask_arr.size*FFI.type_size(:double), cudaMemcpyKind[:cudaMemcpyHostToDevice]
 
 Vector.Cuda_Conv2d threadsPerBlock, num_elements, data_row, data_col, mask_row, mask_col, cu_d_a_arr, cu_m_b_arr, cu_res_c_arr
 Vector.CudaDeviceSynchronize
 
-Vector.CudaMemcpy result_arr_ptr, cu_res_c_arr, ((data_row-mask_row+1)*(data_col-mask_col+1)*8), cudaMemcpyKind[:cudaMemcpyDeviceToHost]
+Vector.CudaMemcpy result_arr_ptr, cu_res_c_arr, ((data_row-mask_row+1)*(data_col-mask_col+1)*FFI.type_size(:double)), cudaMemcpyKind[:cudaMemcpyDeviceToHost]
 result_arr = result_arr_ptr.read_array_of_double ((data_row-mask_row+1)*(data_col-mask_col+1))
 
 result_arr.each do |item|
