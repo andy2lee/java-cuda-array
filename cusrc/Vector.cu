@@ -5,6 +5,23 @@
 #include <cuda_runtime.h>
 #include <cmath>
 
+__global__ void cuda_conv2d(uint32_t d_row, uint32_t d_col, uint32_t m_row, uint32_t m_col, double* d_arr, double* m_arr, double* res_arr) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    int j = blockDim.y * blockIdx.y + threadIdx.y;
+    int row_cnt = (d_row-m_row + 1), col_cnt = (d_col-m_col + 1);
+
+    if ((i < row_cnt) && (j < col_cnt)) {
+        double res = 0.0;
+        for (int m = 0; m < m_row; m++) {
+            for (int n = 0; n < m_col; n++) {
+                res+=d_arr[(i * d_col + j) + (m * d_col + n)] * m_arr[m * m_col + n];
+                // res += d_arr[(i + m) * d_col + (j + n)] * m_arr[m * m_col + n];
+            }
+        }
+        res_arr[i * col_cnt + j] = res;
+    }
+}
+
 __global__ void cuda_add(size_t n, const double* A, const double* B, double* C) {
     int i = blockDim.x * blockIdx.x + threadIdx.x;
     if (i < n) {
@@ -253,6 +270,23 @@ void CudaMemcpy(void* dst_arr, void* src_arr, uint32_t size, uint32_t direction)
     err = cudaMemcpy(dst_arr, src_arr, size, cuda_mem_cpy_kind);
     if (err != cudaSuccess)
         printf("Memcpy: %s\n", cudaGetErrorString(err));
+}
+
+void Cuda_Conv2d(uint32_t threadsPerBlock, uint32_t num_elements, uint32_t d_row, uint32_t d_col, uint32_t m_row, uint32_t m_col, double* d_arr, double* m_arr, double* res_arr) {
+    // size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+
+    int row_cnt = d_row - m_row + 1;
+    int col_cnt = d_col - m_col + 1;
+
+    dim3 block(16,16);
+
+    dim3 grid(
+        (col_cnt + block.x - 1) / block.x,
+        (row_cnt + block.y - 1) / block.y
+    );
+
+    cuda_conv2d<<<grid, block>>>(d_row, d_col, m_row, m_col, d_arr, m_arr, res_arr);
+    cuda_get_latest_err();
 }
 
 void Cuda_Add(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double* B_d_arr, double* C_d_arr) {
