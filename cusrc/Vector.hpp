@@ -8,6 +8,7 @@ extern "C" {
     WINLIB_API void* CudaMalloc(uint32_t);
     WINLIB_API void CudaFree(void*);
     WINLIB_API void CudaMemcpy(void*, void*, uint32_t, uint32_t);
+    WINLIB_API void Cuda_Conv2d(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, double*, double*, double*);
     WINLIB_API void Cuda_Add(uint32_t, uint32_t, double*, double*, double*);
     WINLIB_API void Cuda_Sub(uint32_t, uint32_t, double*, double*, double*);
     WINLIB_API void Cuda_Mul(uint32_t, uint32_t, double*, double*, double*);
@@ -15,7 +16,7 @@ extern "C" {
     WINLIB_API void Cuda_Neg(uint32_t, uint32_t, double*, double*);
     WINLIB_API void Cuda_Erff(uint32_t, uint32_t, double*, double*);
     WINLIB_API void Cuda_Ceil(uint32_t, uint32_t, double*, double*);
-    WINLIB_API void Cuda_Flooe(uint32_t, uint32_t, double*, double*);
+    WINLIB_API void Cuda_Floor(uint32_t, uint32_t, double*, double*);
     WINLIB_API void Cuda_Round(uint32_t, uint32_t, double*, double*);
     WINLIB_API void Cuda_Log(uint32_t, uint32_t, double*, double*);
     WINLIB_API void Cuda_Pow(uint32_t, uint32_t, double*, double, double*);
