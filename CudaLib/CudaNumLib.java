@@ -16,7 +16,10 @@ public class CudaNumLib {
     private static MethodHandle __cuda_add, __cuda_sub, __cuda_mul, __cuda_div, __cuda_neg;
     private static MethodHandle __cuda_add_scalar, __cuda_sub_scalar, __cuda_mul_scalar, __cuda_div_scalar;
     private static MethodHandle __cuda_dsqrt_rn, __cuda__powf, __cuda__logf, __cuda__log2f; 
-
+    private static MethodHandle __cuda_erff, __cuda_ceil, __cuda_floor, __cuda_round, __cuda_log, __cuda_pow;
+    private static MethodHandle __cuda_ge, __cuda_bge, __cuda_eq, __cuda_beq, __cuda_gt, __cuda_bgt, __cuda_le, __cuda_ble, __cuda_lt, __cuda_blt;
+    private static MethodHandle __cuda_conv2d;
+    
     public static enum cudaMemcpyKind {
         cudaMemcpyHostToHost      ,
         cudaMemcpyHostToDevice    ,
@@ -85,6 +88,161 @@ public class CudaNumLib {
                 );
             __cuda_neg = linker.downcallHandle(
                 lookup.find("Cuda_Neg").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_erff = linker.downcallHandle(
+                lookup.find("Cuda_Erff").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_ceil = linker.downcallHandle(
+                lookup.find("Cuda_Ceil").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_floor = linker.downcallHandle(
+                lookup.find("Cuda_Floor").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_round = linker.downcallHandle(
+                lookup.find("Cuda_Round").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_log = linker.downcallHandle(
+                lookup.find("Cuda_Log").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_pow = linker.downcallHandle(
+                lookup.find("Cuda_Pow").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        JAVA_DOUBLE,
+                        ADDRESS
+                    )
+                );
+            __cuda_ge = linker.downcallHandle(
+                lookup.find("Cuda_GE").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        JAVA_DOUBLE,
+                        ADDRESS
+                    )
+                );
+            __cuda_bge = linker.downcallHandle(
+                lookup.find("Cuda_BGE").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_eq = linker.downcallHandle(
+                lookup.find("Cuda_EQ").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        JAVA_DOUBLE,
+                        ADDRESS
+                    )
+                );
+            __cuda_beq = linker.downcallHandle(
+                lookup.find("Cuda_BEQ").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_gt = linker.downcallHandle(
+                lookup.find("Cuda_GT").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        JAVA_DOUBLE,
+                        ADDRESS
+                    )
+                );
+            __cuda_bgt = linker.downcallHandle(
+                lookup.find("Cuda_BGT").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_le = linker.downcallHandle(
+                lookup.find("Cuda_LE").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        JAVA_DOUBLE,
+                        ADDRESS
+                    )
+                );
+            __cuda_ble = linker.downcallHandle(
+                lookup.find("Cuda_BLE").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_lt = linker.downcallHandle(
+                lookup.find("Cuda_LT").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        JAVA_DOUBLE,
+                        ADDRESS
+                    )
+                );
+            __cuda_blt = linker.downcallHandle(
+                lookup.find("Cuda_BLT").get(),
                     FunctionDescriptor.ofVoid(
                         JAVA_INT,
                         JAVA_INT,
@@ -170,6 +328,19 @@ public class CudaNumLib {
                     FunctionDescriptor.ofVoid(
                         JAVA_INT,
                         JAVA_INT,
+                        ADDRESS,
+                        ADDRESS
+                    )
+                );
+            __cuda_conv2d = linker.downcallHandle(
+                lookup.find("Cuda_Conv2d").get(),
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
                         ADDRESS,
                         ADDRESS
                     )
@@ -261,6 +432,134 @@ public class CudaNumLib {
         }
     }
 
+    public static void cuda_erff(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_erff.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_ceil(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_ceil.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_floor(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_floor.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_round(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_round.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_log(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_log.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_pow(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_pow.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_ge(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_ge.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_bge(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_bge.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_eq(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_eq.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_beq(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_beq.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_gt(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_gt.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_bgt(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_bgt.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_le(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_le.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_ble(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_ble.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_lt(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_lt.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_blt(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_blt.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void cuda_add_scalar(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, double d_b, CudaMemObj d_c_obj_ptr) {
         try {
             __cuda_add_scalar.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b, d_c_obj_ptr.get_ptr());
@@ -321,6 +620,14 @@ public class CudaNumLib {
     public static void cuda__log2f(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_c_obj_ptr) {
         try {
             __cuda__log2f.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_conv2d(int threadsPerBlock, int d_row, int d_col, int m_row, int m_col, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr) {
+        try {
+            __cuda_conv2d.invoke(threadsPerBlock, d_row, d_col, m_row, m_col, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr());
         } catch (Throwable e) {
             e.printStackTrace();
         }
