@@ -272,13 +272,11 @@ void CudaMemcpy(void* dst_arr, void* src_arr, uint32_t size, uint32_t direction)
         printf("Memcpy: %s\n", cudaGetErrorString(err));
 }
 
-void Cuda_Conv2d(uint32_t threadsPerBlock, uint32_t num_elements, uint32_t d_row, uint32_t d_col, uint32_t m_row, uint32_t m_col, double* d_arr, double* m_arr, double* res_arr) {
-    // size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
-
+void Cuda_Conv2d(uint32_t threadsPerBlock, uint32_t d_row, uint32_t d_col, uint32_t m_row, uint32_t m_col, double* d_arr, double* m_arr, double* res_arr) {
     int row_cnt = d_row - m_row + 1;
     int col_cnt = d_col - m_col + 1;
 
-    dim3 block(16,16);
+    dim3 block(threadsPerBlock, threadsPerBlock);
 
     dim3 grid(
         (col_cnt + block.x - 1) / block.x,
@@ -357,7 +355,7 @@ void Cuda_Pow(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, 
 
 void Cuda_GE(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_arr, double B_d, double* C_d_arr) {
     size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
-    cuda_pow<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
+    cuda_ge<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, B_d, C_d_arr);
     cuda_get_latest_err();
 }
 
