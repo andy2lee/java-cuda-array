@@ -272,6 +272,39 @@ void CudaMemcpy(void* dst_arr, void* src_arr, uint32_t size, uint32_t direction)
         printf("Memcpy: %s\n", cudaGetErrorString(err));
 }
 
+void CudaMemcpyShift(void* dst_arr, void* src_arr, uint32_t size, uint32_t shift, uint32_t direction) {
+    cudaError_t err;
+    cudaMemcpyKind cuda_mem_cpy_kind = cudaMemcpyDefault;
+    char* curr_dst_arr = (char*)dst_arr;
+    char* curr_src_arr = (char*)src_arr;
+
+    switch (direction)
+    {
+    case cudaMemcpyHostToHost:
+        cuda_mem_cpy_kind = cudaMemcpyHostToHost;
+        break;
+    case cudaMemcpyHostToDevice:
+        cuda_mem_cpy_kind = cudaMemcpyHostToDevice;
+        curr_dst_arr = curr_dst_arr + shift;
+        break;
+    case cudaMemcpyDeviceToHost:
+        cuda_mem_cpy_kind = cudaMemcpyDeviceToHost;
+        curr_src_arr = curr_src_arr + shift;
+        break;
+    case cudaMemcpyDeviceToDevice:
+        cuda_mem_cpy_kind = cudaMemcpyDeviceToDevice;
+        break;
+    default:
+        cuda_mem_cpy_kind = cudaMemcpyHostToHost;
+        break;
+    }
+
+    err = cudaMemcpy(curr_dst_arr, curr_src_arr, size, cuda_mem_cpy_kind);
+
+    if (err != cudaSuccess)
+        printf("Memcpy: %s\n", cudaGetErrorString(err));
+}
+
 void Cuda_Conv2d(uint32_t threadsPerBlock, uint32_t d_row, uint32_t d_col, uint32_t m_row, uint32_t m_col, double* d_arr, double* m_arr, double* res_arr) {
     int row_cnt = d_row - m_row + 1;
     int col_cnt = d_col - m_col + 1;

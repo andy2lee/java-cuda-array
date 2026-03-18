@@ -8,6 +8,7 @@ extern "C" {
     WINLIB_API void* CudaMalloc(uint32_t);
     WINLIB_API void CudaFree(void*);
     WINLIB_API void CudaMemcpy(void*, void*, uint32_t, uint32_t);
+    WINLIB_API void CudaMemcpyShift(void*, void*, uint32_t, uint32_t, uint32_t);
     WINLIB_API void Cuda_Conv2d(uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, double*, double*, double*);
     WINLIB_API void Cuda_Add(uint32_t, uint32_t, double*, double*, double*);
     WINLIB_API void Cuda_Sub(uint32_t, uint32_t, double*, double*, double*);
