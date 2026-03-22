@@ -5,6 +5,8 @@
 #endif
 
 extern "C" {
+    WINLIB_API void Cuda_Get_Slice(uint32_t, uint32_t, size_t, uint32_t*, uint32_t*, uint32_t*, double*, double*);
+    WINLIB_API void Cuda_Set_Slice(uint32_t, uint32_t, size_t, uint32_t*, uint32_t*, uint32_t*, double*, double*);
     WINLIB_API void* CudaMalloc(uint32_t);
     WINLIB_API void CudaFree(void*);
     WINLIB_API void CudaMemcpy(void*, void*, uint32_t, uint32_t);

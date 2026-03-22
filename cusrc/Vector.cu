@@ -225,11 +225,86 @@ __global__ void cuda___log2f(size_t n, const double* A, double* C) {
     }
 }
 
+__global__ void cuda_get_slice(
+    size_t n, 
+    size_t shape_len, 
+    uint32_t* ndcu_slice_start, 
+    uint32_t* re_stride, 
+    uint32_t* stride,  
+    double* res_cu_na_arr, 
+    double* cu_na_arr
+) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        uint32_t i_rem = i;
+        uint32_t index = 0;
+        
+        for (uint32_t j = 0; j < shape_len; j++) {
+            uint32_t i_div = i_rem / re_stride[j];
+            i_rem = i_rem % re_stride[j];
+            index+=((ndcu_slice_start[j] + i_div) * stride[j]);
+        }
+        res_cu_na_arr[i] = cu_na_arr[index];
+    }
+}
+
+__global__ void cuda_set_slice(
+    size_t n, 
+    size_t shape_len, 
+    uint32_t* ndcu_slice_start, 
+    uint32_t* re_stride, 
+    uint32_t* stride,  
+    double* res_cu_na_arr,
+    double* cu_na_arr
+) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    if (i < n) {
+        uint32_t i_rem = i;
+        uint32_t index = 0;
+        
+        for (uint32_t j = 0; j < shape_len; j++) {
+            uint32_t i_div = i_rem / re_stride[j];
+            i_rem = i_rem % re_stride[j];
+            index+=((ndcu_slice_start[j] + i_div) * stride[j]);
+        }
+        // res_cu_na_arr[i] = cu_na_arr[index];
+        res_cu_na_arr[index] = cu_na_arr[i];
+    }
+}
+
 void cuda_get_latest_err(void) {
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {
         printf("Kernel launch failed: %s\n", cudaGetErrorString(err));
     }
+}
+
+void Cuda_Get_Slice(
+    uint32_t threadsPerBlock, uint32_t num_elements, 
+    size_t shape_len,
+    uint32_t* ndcu_slice_start, 
+    uint32_t* re_stride, 
+    uint32_t* stride,  
+    double* res_cu_na_arr, 
+    double* cu_na_arr
+) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_get_slice<<<blocksPerGrid, threadsPerBlock>>>(num_elements, shape_len, ndcu_slice_start, re_stride, stride, res_cu_na_arr, cu_na_arr);
+    cuda_get_latest_err();
+}
+
+void Cuda_Set_Slice(
+    uint32_t threadsPerBlock, uint32_t num_elements, 
+    size_t shape_len,
+    uint32_t* ndcu_slice_start, 
+    uint32_t* re_stride, 
+    uint32_t* stride,  
+    double* res_cu_na_arr, 
+    double* cu_na_arr
+) {
+    size_t blocksPerGrid   = (num_elements + threadsPerBlock - 1) / threadsPerBlock;
+    cuda_set_slice<<<blocksPerGrid, threadsPerBlock>>>(num_elements, shape_len, ndcu_slice_start, re_stride, stride, res_cu_na_arr, cu_na_arr);
+    cuda_get_latest_err();
 }
 
 void* CudaMalloc(uint32_t size) {
@@ -493,6 +568,21 @@ void Cuda___log2f(uint32_t threadsPerBlock, uint32_t num_elements, double* A_d_a
     cuda___log2f<<<blocksPerGrid, threadsPerBlock>>>(num_elements, A_d_arr, C_d_arr);
     cuda_get_latest_err();
 }
+
+// __global__ void cuda_ndcu_reshape(uint32_t re_elem, uint32_t* re_shapes, uint32_t* re_strides) {
+//     int i = blockDim.x * blockIdx.x + threadIdx.x;
+//     if (i < n) {
+//         C[i] = (A[i] >= B)? 1.0: 0.0;
+//     }
+// }
+
+// void Cuda_NDcu_Reshape(uint32_t threadsPerBlock, uint32_t re_elem, uint32_t* re_shapes, uint32_t* re_strides) {
+//     double* cu_arr =  (double*)CudaMalloc(re_elem);
+//     size_t blocksPerGrid   = (re_elem + threadsPerBlock - 1) / threadsPerBlock;
+//     cuda_ndcu_reshape<<<blocksPerGrid, threadsPerBlock>>>(re_elem, re_shapes, re_strides);
+
+//     cuda_get_latest_err();
+// }
 
 void CudaDeviceSynchronize(void) {
     cudaDeviceSynchronize();
