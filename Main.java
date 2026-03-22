@@ -1,83 +1,94 @@
 import CudaLib.CudaMemObj;
+import CudaLib.NDCuArray;
+import CudaLib.NDCuSlice;
+
 import static java.lang.foreign.ValueLayout.*;
 
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.ValueLayout;
+import java.util.Arrays;
 
 import static CudaLib.CudaNumLib.*;
 import static CudaLib.CudaNumLib.cudaMemcpyKind.*;
+import CudaLib.NDCuArray;
+import static CudaLib.NDCuSlice.Sliceof;
 
 public class Main {
     public static void main(String[] args) throws Throwable {
-        int num_elements = 1000, threadsPerBlock = 256;
+        // Array test.
+
+        NDCuArray arr = new NDCuArray(new double[]{ 1,  2,  3,  4,  5,  6,  7,  8,  9, 
+                                                 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+                                                 19, 20, 21, 22, 23, 24, 25, 26, 27,
+                                                 28, 29, 30, 31, 32, 33, 34, 35, 36 });
+                                                 
+        IO.println(arr.arr_size);
+        arr.reshape(2, 2, 9);
+        double get_val = arr.get(1, 1, 3); // depth - row - col
+        IO.println(get_val);
+        arr.set(1234.0, 1, 1, 3);
+        double get_val_02 = arr.get(1, 1, 3);
+        IO.println(get_val_02);
+
+        NDCuArray arr02 = new NDCuArray(new double[]{ 1,  2,  3,  4,  5,  6,  7,  8,  9, 
+                                                 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+                                                 19, 20, 21, 22, 23, 24, 25, 26, 27,
+                                                 28, 29, 30, 31, 32, 33, 34, 35, 36 });
         
-        CudaMemObj a_arr = hostMalloc(JAVA_DOUBLE, num_elements);
-        CudaMemObj b_arr = hostMalloc(JAVA_DOUBLE, num_elements);
-        CudaMemObj c_arr = hostMalloc(JAVA_DOUBLE, num_elements);
+        NDCuArray arr03 = arr.add(arr02);
+        IO.println(arr03.get(1, 1, 3));
 
-        for (int i = 0; i < 5; i++) {
-            a_arr.get_ptr().setAtIndex(JAVA_DOUBLE, i, 10.0);
-            b_arr.get_ptr().setAtIndex(JAVA_DOUBLE, i, 10.0);
-        }
+        NDCuArray arr04 = new NDCuArray(new double[]{ 1,  2,  3,  4,  5,  6,  7,  8,  9, 
+                                                 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+                                                 19, 20, 21, 22, 23, 24 });
+        arr04.reshape(2, 3, 4);
+        // 1,  2,  3,  4  //  13, 14, 15, 16
+        // 5,  [6,  7,  8  //  17, [18, 19, 20
+        // 9,  10, 11,] 12  // 21, 22, 23,] 24
 
-        int byte_size_arr = (int)a_arr.get_ptr().byteSize();
-        CudaMemObj cu_a_arr = cudaMalloc(byte_size_arr);
-        CudaMemObj cu_b_arr = cudaMalloc(byte_size_arr);
-        CudaMemObj cu_c_arr = cudaMalloc(byte_size_arr);
+        NDCuArray arr06 = arr04.get(Sliceof(0, 2), Sliceof(1, 3), Sliceof(1, 3));
+        IO.println(Arrays.toString(arr06.shape));
+        IO.println(Arrays.toString(arr04.shape));
 
-        cudaMemcpy(cu_a_arr, a_arr, byte_size_arr, cudaMemcpyHostToDevice);
-        cudaMemcpy(cu_b_arr, b_arr, byte_size_arr, cudaMemcpyHostToDevice);
-        cuda_add(threadsPerBlock, num_elements, cu_a_arr, cu_b_arr, cu_c_arr);
-        cuda__powf(threadsPerBlock, num_elements, cu_c_arr, 2.0, cu_c_arr);
-        cudaDeviceSynchronize();
-        cudaMemcpy(c_arr, cu_c_arr, byte_size_arr, cudaMemcpyDeviceToHost);
+        IO.println(arr06.get(0, 0, 0));
+        IO.println(arr06.get(0, 0, 1));
+        IO.println(arr06.get(0, 1, 0));
+        IO.println(arr06.get(0, 1, 1));
+        IO.println(arr06.get(1, 0, 0));
+        IO.println(arr06.get(1, 0, 1));
+        IO.println(arr06.get(1, 1, 0));
+        IO.println(arr06.get(1, 1, 1));
 
-        for (int i = 0; i < 5; i++) {
-            IO.println(c_arr.get_ptr().getAtIndex(JAVA_DOUBLE, i));
-        }
+        arr06.set(100.0, 0, 0, 0);
+        arr06.set(200.0, 0, 0, 1);
+        arr06.set(300.0,0, 1, 0);
+        arr06.set(400.0,0, 1, 1);
+        arr06.set(500.0,1, 0, 0);
+        arr06.set(600.0,1, 0, 1);
+        arr06.set(700.0,1, 1, 0);
+        arr06.set(800.0,1, 1, 1);
 
-        cudaFree(cu_a_arr);
-        cudaFree(cu_b_arr);
-        cudaFree(cu_c_arr);
-
-        // Conv2d
-        double[] data_arr = { 1,  2,  3,  4,  5,  6,  7,  8,  9, 
-                             10, 11, 12, 13, 14, 15, 16, 17, 18, 
-                             19, 20, 21, 22, 23, 24, 25, 26, 27,
-                             28, 29, 30, 31, 32, 33, 34, 35, 36 };
-        double[] mask_arr = { 3,  4,  5,
-                              6,  7,  8,
-                              9, 10, 11 };
-
-        int data_row = 4, data_col = 9;
-        int mask_row = 3, mask_col = 3;
-
-        CudaMemObj data_arr_ptr = hostMalloc(JAVA_DOUBLE, data_arr.length);
-        CudaMemObj mask_arr_ptr = hostMalloc(JAVA_DOUBLE, mask_arr.length);
-        CudaMemObj result_arr_ptr = hostMalloc(JAVA_DOUBLE, (data_row-mask_row+1)*(data_col-mask_col+1));
+        IO.println(arr06.get(0, 0, 0));
+        IO.println(arr06.get(0, 0, 1));
+        IO.println(arr06.get(0, 1, 0));
+        IO.println(arr06.get(0, 1, 1));
+        IO.println(arr06.get(1, 0, 0));
+        IO.println(arr06.get(1, 0, 1));
+        IO.println(arr06.get(1, 1, 0));
+        IO.println(arr06.get(1, 1, 1));
         
-        for (int i = 0; i < data_arr.length; i++) {
-            data_arr_ptr.get_ptr().setAtIndex(JAVA_DOUBLE, i, data_arr[i]);
-        }
-        for (int i = 0; i < mask_arr.length; i++) {
-            mask_arr_ptr.get_ptr().setAtIndex(JAVA_DOUBLE, i, mask_arr[i]);
-        }
+        arr04.set(arr06, Sliceof(0, 2), Sliceof(1, 3), Sliceof(2, 4));
+        IO.println(arr04.get(0, 1, 2));
+        IO.println(arr04.get(0, 1, 3));
+        IO.println(arr04.get(0, 2, 2));
+        IO.println(arr04.get(0, 2, 3));
+        IO.println(arr04.get(1, 1, 2));
+        IO.println(arr04.get(1, 1, 3));
+        IO.println(arr04.get(1, 2, 2));
+        IO.println(arr04.get(1, 2, 3));
+        arr04.print();
 
-        CudaMemObj cu_d_a_arr = cudaMalloc((int)data_arr_ptr.get_ptr().byteSize());
-        CudaMemObj cu_m_b_arr = cudaMalloc((int)mask_arr_ptr.get_ptr().byteSize());
-        CudaMemObj cu_res_c_arr = cudaMalloc((int)result_arr_ptr.get_ptr().byteSize());
-
-        cudaMemcpy(cu_d_a_arr, data_arr_ptr, (int)data_arr_ptr.get_ptr().byteSize(), cudaMemcpyHostToDevice);
-        cudaMemcpy(cu_m_b_arr, mask_arr_ptr, (int)mask_arr_ptr.get_ptr().byteSize(), cudaMemcpyHostToDevice);
-        cuda_conv2d(16, data_row, data_col, mask_row, mask_col, cu_d_a_arr, cu_m_b_arr, cu_res_c_arr);
-        cudaDeviceSynchronize();
-
-        IO.println((int)result_arr_ptr.get_ptr().byteSize());
-        IO.println(((data_row-mask_row+1)*(data_col-mask_col+1))*8);
-        cudaMemcpy(result_arr_ptr, cu_res_c_arr, (int)result_arr_ptr.get_ptr().byteSize(), cudaMemcpyDeviceToHost);
-
-        for (int i = 0; i < (data_row-mask_row+1)*(data_col-mask_col+1); i++) {
-            IO.println(result_arr_ptr.get_ptr().getAtIndex(JAVA_DOUBLE, i));
-        }
+        NDCuArray cu_arr_zeros = new NDCuArray(2, 3, 4);
+        cu_arr_zeros.print();
     }
 }
