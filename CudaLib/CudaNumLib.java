@@ -24,7 +24,33 @@ public class CudaNumLib {
         cudaMemcpyDefault          
     }
 
-    public static void cuda_get_slice(int threadsPerBlock,int num_elements, int shape_len, CudaMemObj ndcu_slice_start, CudaMemObj re_stride, CudaMemObj stride, CudaMemObj res_cu_na_arr, CudaMemObj cu_na_arr) {
+    public static void cuda_matmul(int threadsPerBlock, int num_elements, CudaMemObj d_a_obj_ptr, CudaMemObj d_b_obj_ptr, CudaMemObj d_c_obj_ptr, int a_row_len, int b_col_len, int ab_mid_len, int A_arr_shift_p, int B_arr_shift_p, int C_arr_shift_p) {
+        try {
+            var __cuda_matmul = method_handle_map.computeIfAbsent("Cuda_Matmul", k -> linker.downcallHandle(
+                lookup.find("Cuda_Matmul")
+                      .orElseThrow(() -> new RuntimeException("Symbol not found")), 
+                    FunctionDescriptor.ofVoid(
+                        JAVA_INT,
+                        JAVA_INT,
+                        ADDRESS,
+                        ADDRESS,
+                        ADDRESS,
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT,
+                        JAVA_INT
+                    )
+                )
+            );
+            __cuda_matmul.invoke(threadsPerBlock, num_elements, d_a_obj_ptr.get_ptr(), d_b_obj_ptr.get_ptr(), d_c_obj_ptr.get_ptr(), a_row_len, b_col_len, ab_mid_len, A_arr_shift_p, B_arr_shift_p, C_arr_shift_p);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cuda_get_slice(int threadsPerBlock, int num_elements, int shape_len, CudaMemObj ndcu_slice_start, CudaMemObj re_stride, CudaMemObj stride, CudaMemObj res_cu_na_arr, CudaMemObj cu_na_arr) {
         try {
             var __cuda_get_slice = method_handle_map.computeIfAbsent("Cuda_Get_Slice", k -> linker.downcallHandle(
                 lookup.find("Cuda_Get_Slice")
@@ -47,7 +73,7 @@ public class CudaNumLib {
         }
     }
 
-    public static void cuda_set_slice(int threadsPerBlock,int num_elements, int shape_len, CudaMemObj ndcu_slice_start, CudaMemObj re_stride, CudaMemObj stride, CudaMemObj res_cu_na_arr, CudaMemObj cu_na_arr) {
+    public static void cuda_set_slice(int threadsPerBlock, int num_elements, int shape_len, CudaMemObj ndcu_slice_start, CudaMemObj re_stride, CudaMemObj stride, CudaMemObj res_cu_na_arr, CudaMemObj cu_na_arr) {
         try { 
             var __cuda_set_slice = method_handle_map.computeIfAbsent("Cuda_Set_Slice", k -> linker.downcallHandle(
                 lookup.find("Cuda_Set_Slice")
