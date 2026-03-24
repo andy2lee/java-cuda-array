@@ -225,6 +225,26 @@ __global__ void cuda___log2f(size_t n, const double* A, double* C) {
     }
 }
 
+__global__ void cuda_matmul(
+    const double* A_arr, 
+    const double* B_arr,
+    double* C_arr, 
+    const uint32_t a_row_len, 
+    const uint32_t b_col_len, 
+    const uint32_t ab_mid_len
+) {
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+    int j = blockDim.y * blockIdx.y + threadIdx.y;
+
+    if ((i < a_row_len) && (j < b_col_len)) {
+        double res = 0;
+        for (int k = 0; k < ab_mid_len; k++) {
+            res+=(A_arr[i*ab_mid_len+k] * B_arr[j+k*b_col_len]);
+        }
+        C_arr[i*b_col_len+j] = res;
+    }
+}
+
 __global__ void cuda_get_slice(
     size_t n, 
     size_t shape_len, 
@@ -267,7 +287,6 @@ __global__ void cuda_set_slice(
             i_rem = i_rem % re_stride[j];
             index+=((ndcu_slice_start[j] + i_div) * stride[j]);
         }
-        // res_cu_na_arr[i] = cu_na_arr[index];
         res_cu_na_arr[index] = cu_na_arr[i];
     }
 }
@@ -277,6 +296,21 @@ void cuda_get_latest_err(void) {
     if (err != cudaSuccess) {
         printf("Kernel launch failed: %s\n", cudaGetErrorString(err));
     }
+}
+
+void Cuda_Matmul(uint32_t threadsPerBlock, uint32_t num_elements, double* A_arr, double* B_arr, double* C_arr, uint32_t a_row_len, uint32_t b_col_len, uint32_t ab_mid_len, uint32_t A_arr_shift_p, uint32_t B_arr_shift_p, uint32_t C_arr_shift_p) {
+    int row_cnt = a_row_len;
+    int col_cnt = b_col_len;
+
+    dim3 block(threadsPerBlock, threadsPerBlock);
+
+    dim3 grid(
+        (col_cnt + block.x - 1) / block.x,
+        (row_cnt + block.y - 1) / block.y
+    );
+
+    cuda_matmul<<<grid, block>>>((A_arr+A_arr_shift_p), (B_arr+B_arr_shift_p), (C_arr+C_arr_shift_p), a_row_len, b_col_len, ab_mid_len);
+    cuda_get_latest_err();
 }
 
 void Cuda_Get_Slice(
